@@ -1,6 +1,6 @@
 # Conduit
 
-<div alt style="text-align: center;">
+<div alt style="text-align: center; transform: scale(.80)">
 	<picture>
 		<source media="(prefers-color-scheme: dark)" srcset="./conduit.png" />
 		<img alt="conduit" src="./conduit.png" />
