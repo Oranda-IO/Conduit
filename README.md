@@ -35,22 +35,27 @@ Useful flags:
 - `-target-host` upstream host (default `127.0.0.1`)
 - `-poll-interval` rescan interval (default `2s`)
 
-## Quick Usage Example
+## Example
 
-Terminal 1 (demo target service on internal port `3000`):
+**Continaer Terminal**
+
+Run the demo service on internal port `3000`:
 
 ```bash
 go run ./demo/echo -port 3000
 ```
 
-Terminal 2 (conduit):
+**Continaer Terminal**
+
+Run the `conduit` daemon:
 
 ```bash
 ./conduit -public-host 0.0.0.0 -public-port 9000
 ```
 
-Terminal 3:
+**Host Terminal**
 
+Access the container service from the host:
 ```bash
 curl "http://localhost:9000/3000/ping?name=alice"
 ```
