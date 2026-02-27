@@ -1,8 +1,14 @@
 # Conduit
 
-<img src="./conduit.png" width="400">
+<div alt style="text-align: center;">
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset="./conduit.png" />
+		<img alt="conduit" src="./conduit.png" />
+	</picture>
+</div>
 
-Automatic Port Forwarding
+
+**Automatic Port Forwarding**
 
 Use a single exposed port to access any service running on your container.
 
