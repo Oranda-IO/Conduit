@@ -1,5 +1,3 @@
-# Conduit
-
 <p align="center">
   <a href="https://github.com/Oranda-IO/Conduit/stargazers"><img src="https://img.shields.io/github/stars/Oranda-IO/Conduit?style=social" alt="GitHub Stars" /></a>&nbsp;
   <img src="https://img.shields.io/github/license/Oranda-IO/Conduit" alt="License" />&nbsp;
@@ -8,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="./conduit.png" alt="Conduit" width="80" />
+  <img src="./conduit.png" alt="Conduit" width="300" />
 </p>
 
 <h1 align="center">Conduit</h1>
