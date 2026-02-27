@@ -12,9 +12,9 @@
 <h1 align="center">Conduit</h1>
 
 <p align="center">
-  <strong>Quick Automatic Port Forwarding for Docker Containers</strong>
+  <strong>Automatic Port Forwarding for Docker Containers</strong>
   <br/>
-  Use a single exposed port to access any service running on your container.
+  Use a single exposed port to quickly access any service running on your container.
 </p>
 
 ---
