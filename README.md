@@ -1,16 +1,25 @@
 # Conduit
 
-<div alt style="text-align: center; transform: scale(.50)">
-	<picture>
-		<source media="(prefers-color-scheme: dark)" srcset="./conduit.png" />
-		<img alt="conduit" src="./conduit.png" />
-	</picture>
-</div>
+<p align="center">
+  <a href="https://github.com/Oranda-IO/Conduit/stargazers"><img src="https://img.shields.io/github/stars/Oranda-IO/Conduit?style=social" alt="GitHub Stars" /></a>&nbsp;
+  <img src="https://img.shields.io/github/license/Oranda-IO/Conduit" alt="License" />&nbsp;
+  <img src="https://img.shields.io/badge/version-0.9.0-blue" alt="Version" />&nbsp;
+  
+</p>
 
+<p align="center">
+  <img src="./conduit.png" alt="Conduit" width="80" />
+</p>
 
-**Automatic Port Forwarding**
+<h1 align="center">Conduit</h1>
 
-Use a single exposed port to access any service running on your container.
+<p align="center">
+  <strong>Quick Automatic Port Forwarding for Docker Containers</strong>
+  <br/>
+  Use a single exposed port to access any service running on your container.
+</p>
+
+---
 
 `conduit` watches local listening TCP ports and forwards HTTP requests by path:
 
