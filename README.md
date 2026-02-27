@@ -13,7 +13,7 @@ Example:
 
 - `http://myserver.com:9000/3000/api/users` -> `http://127.0.0.1:3000/api/users`
 
-## Install (Simple)
+## Install
 
 1. Install Go (1.19+).
 2. Build:
@@ -22,7 +22,7 @@ Example:
 go build -o conduit .
 ```
 
-## Run (Simple)
+## Run
 
 ```bash
 ./conduit -public-host 0.0.0.0 -public-port 9000
