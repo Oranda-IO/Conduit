@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -21,26 +20,20 @@ import (
 
 type Server struct {
 	targetHost string
-	domainName string
 	ports      *PortTable
 	settings   *SettingsStore
 	mu         sync.Mutex
 	proxies    map[int]*httputil.ReverseProxy
 }
 
-func NewServer(targetHost string, ports *PortTable, settings *SettingsStore, domainName string) *Server {
+func NewServer(targetHost string, ports *PortTable, settings *SettingsStore) *Server {
 	if settings == nil {
 		settings = NewSettingsStore(defaultSettingsFilePath())
 		_ = settings.Load()
 	}
-	if domainName == "" {
-		domainName = "conduit.local"
-	}
-	domainName = strings.ToLower(strings.TrimSpace(domainName))
 
 	return &Server{
 		targetHost: targetHost,
-		domainName: domainName,
 		ports:      ports,
 		settings:   settings,
 		proxies:    map[int]*httputil.ReverseProxy{},
@@ -116,45 +109,7 @@ type routeTarget struct {
 }
 
 func (s *Server) resolveTarget(r *http.Request) (routeTarget, bool) {
-	if target, ok := s.resolveTargetHost(r.Host, r.URL.Path); ok {
-		return target, true
-	}
 	return s.resolveTargetPath(r.URL.Path)
-}
-
-func (s *Server) resolveTargetHost(hostPort, path string) (routeTarget, bool) {
-	host := normalizeHost(hostPort)
-	if host == "" || s.domainName == "" || host == s.domainName {
-		return routeTarget{}, false
-	}
-
-	suffix := "." + s.domainName
-	if !strings.HasSuffix(host, suffix) {
-		return routeTarget{}, false
-	}
-
-	namePart := strings.TrimSuffix(host, suffix)
-	namePart = strings.TrimSuffix(namePart, ".")
-	name, err := normalizeAppName(namePart)
-	if err != nil {
-		return routeTarget{}, false
-	}
-
-	port, found := s.settings.Lookup(name)
-	if !found {
-		return routeTarget{}, false
-	}
-
-	upstreamPath := path
-	if upstreamPath == "" {
-		upstreamPath = "/"
-	}
-
-	return routeTarget{
-		Port:         port,
-		Name:         name,
-		UpstreamPath: upstreamPath,
-	}, true
 }
 
 func (s *Server) resolveTargetPath(path string) (routeTarget, bool) {
@@ -255,7 +210,6 @@ type cliConfig struct {
 	targetHost   string
 	pollInterval time.Duration
 	settingsFile string
-	domainName   string
 	noHTTP       bool
 	noUI         bool
 	jsonOutput   bool
@@ -271,7 +225,6 @@ func parseConfig(args []string, stderr io.Writer) (cliConfig, []string, error) {
 	fs.StringVar(&cfg.targetHost, "target-host", "127.0.0.1", "Host for local upstream services")
 	fs.DurationVar(&cfg.pollInterval, "poll-interval", 2*time.Second, "How often to rescan local listening ports")
 	fs.StringVar(&cfg.settingsFile, "settings-file", defaultSettingsFilePath(), "Path to conduit settings JSON")
-	fs.StringVar(&cfg.domainName, "domain-name", "conduit.local", "Domain suffix for host-based app routing")
 	fs.BoolVar(&cfg.noHTTP, "no-http", false, "Run without starting the HTTP server")
 	fs.BoolVar(&cfg.noUI, "no-ui", false, "Alias for --no-http")
 	fs.BoolVar(&cfg.jsonOutput, "json", false, "Use JSON output for CLI commands")
@@ -318,14 +271,12 @@ func runServer(cfg cliConfig) error {
 	var targetHost string
 	var pollInterval time.Duration
 	var settingsFile string
-	var domainName string
 
 	publicHost = cfg.publicHost
 	publicPort = cfg.publicPort
 	targetHost = cfg.targetHost
 	pollInterval = cfg.pollInterval
 	settingsFile = cfg.settingsFile
-	domainName = cfg.domainName
 
 	portTable := NewPortTable()
 	if err := portTable.Refresh(); err != nil {
@@ -338,13 +289,12 @@ func runServer(cfg cliConfig) error {
 		log.Printf("settings load warning (%s): %v", settingsFile, err)
 	}
 
-	server := NewServer(targetHost, portTable, settings, domainName)
+	server := NewServer(targetHost, portTable, settings)
 	addr := fmt.Sprintf("%s:%d", publicHost, publicPort)
 
 	log.Printf("conduit listening on http://%s", addr)
 	log.Printf("route format: http://<host>:%d/<internal_port>/<optional_path>", publicPort)
 	log.Printf("named route format: http://<host>:%d/<app_name>/<optional_path>", publicPort)
-	log.Printf("host route format: http://<app>.%s:%d/", domainName, publicPort)
 	log.Printf("settings file: %s", settingsFile)
 	log.Printf("active local ports: %v", sortedPorts(portTable.snapshot()))
 
@@ -507,17 +457,6 @@ func printCommandOutput(out io.Writer, jsonOutput bool, payload any, text string
 	}
 	_, err := fmt.Fprintln(out, text)
 	return err
-}
-
-func normalizeHost(hostPort string) string {
-	host := strings.TrimSpace(hostPort)
-	if host == "" {
-		return ""
-	}
-	if h, _, err := net.SplitHostPort(host); err == nil {
-		return strings.ToLower(strings.TrimSuffix(h, "."))
-	}
-	return strings.ToLower(strings.TrimSuffix(host, "."))
 }
 
 func defaultSettingsFilePath() string {

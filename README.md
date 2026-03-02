@@ -13,7 +13,7 @@
 <p align="center">
   <strong>Automatic Port Forwarding for Docker Containers</strong>
   <br/>
-  Use a single exposed port to quickly access any service running on your container.  Automatic port detection, port forwarding, and app name aliasing with a terminal and browser interface.
+  Use a single exposed port to quickly access services running on your container.  Automatic port detection, port forwarding, and app aliasing.  Both CLI and browser UI.
 </p>
 
 ---
@@ -29,11 +29,14 @@ Example:
 
 ## Why Conduit
 
-- Auto-discovery: watches local listening ports so only running services are routable.
-- Single-port access: expose one port (for example `9000`) and reach many apps through it.
-- Stable aliases: map ports to friendly names so URLs stay consistent across restarts.
-- CLI + HTTP parity for state management: manage aliases and inspect running services from either interface.
-- Built-in UI + API for browser and automation workflows.
+-  Auto Discovery:  Pools for local listening ports to find running services.
+-  Single-Port:  Expose one port (e.g. `9000`) and reach all your apps through it.
+
+-  Consistent:  Deployment platforms vary in their port forwarding strategy.  Conduit keeps it consistent.
+
+-  App Aliases:  Map ports to friendly names so URLs are easy to remember across restarts.
+-  Simple UI:  Use CLI or a browser UI to manage your apps.
+- Built-in API:  Use the HTTP API for automation / workflows.
 
 ## Route Modes
 
@@ -66,15 +69,6 @@ Then:
 
 Conduit only proxies if the target port is currently listening.
 
-### Host route
-
-If `myapp` is mapped in settings and domain name is `conduit.local`:
-
-- `http://myapp.conduit.local:9000/` -> `http://127.0.0.1:3000/`
-- `http://myapp.conduit.local:9000/api/ping` -> `http://127.0.0.1:3000/api/ping`
-
-This uses the request `Host` header instead of a path prefix.
-
 ## Install
 
 1. Install Go (1.22+).
@@ -94,7 +88,6 @@ With one open/public port, examples look like:
 
 - `http://<host>:9000/3000/` for direct port routing
 - `http://<host>:9000/api/` for alias routing
-- `http://api.conduit.local:9000/` for host-header routing
 
 Useful flags:
 
@@ -103,7 +96,6 @@ Useful flags:
 - `-target-host` upstream host (default `127.0.0.1`)
 - `-poll-interval` rescan interval (default `2s`)
 - `-settings-file` settings path (default `~/.conduit/settings.json`)
-- `-domain-name` host-route suffix (default `conduit.local`)
 - `-no-http` run without starting the HTTP server
 - `-no-ui` alias for `-no-http`
 - `-json` JSON output for CLI commands
@@ -246,7 +238,7 @@ Conduit resolves `app_name` from settings, validates mapped port is listening, t
 
 When `conduit` runs normally, it starts one HTTP server that provides:
 
-- Proxy routes (`/<port>/...`, `/<app>/...`, host-header mode)
+- Proxy routes (`/<port>/...`, `/<app>/...`)
 - API endpoints (`/health`, `/ports`, `/apps`)
 - Dashboard UI (`/ui`)
 

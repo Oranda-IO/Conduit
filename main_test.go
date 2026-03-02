@@ -115,7 +115,7 @@ func TestHTTPProxyEndToEnd(t *testing.T) {
 	portTable.lastUpdated = time.Now()
 	portTable.mu.Unlock()
 
-	conduit := NewServer(host, portTable, newTestSettingsStore(t), "conduit.local")
+	conduit := NewServer(host, portTable, newTestSettingsStore(t))
 	public := httptest.NewServer(conduit.routes())
 	defer public.Close()
 
@@ -181,88 +181,13 @@ func TestHTTPProxyByNameEndToEnd(t *testing.T) {
 	portTable.lastUpdated = time.Now()
 	portTable.mu.Unlock()
 
-	conduit := NewServer(host, portTable, settings, "conduit.local")
+	conduit := NewServer(host, portTable, settings)
 	public := httptest.NewServer(conduit.routes())
 	defer public.Close()
 
 	resp, err := http.Get(public.URL + "/myapp/hello/world?x=1")
 	if err != nil {
 		t.Fatalf("GET via named route: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		t.Fatalf("status=%d body=%s", resp.StatusCode, string(body))
-	}
-
-	var payload map[string]string
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		t.Fatalf("decode payload: %v", err)
-	}
-
-	if payload["path"] != "/hello/world" {
-		t.Fatalf("path=%q want=/hello/world", payload["path"])
-	}
-	if payload["query"] != "x=1" {
-		t.Fatalf("query=%q want=x=1", payload["query"])
-	}
-	if payload["target_port_header"] != portText {
-		t.Fatalf("target_port_header=%q want=%q", payload["target_port_header"], portText)
-	}
-	if payload["target_name_header"] != "myapp" {
-		t.Fatalf("target_name_header=%q want=myapp", payload["target_name_header"])
-	}
-}
-
-func TestHTTPProxyByHostEndToEnd(t *testing.T) {
-	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, map[string]string{
-			"path":               r.URL.Path,
-			"query":              r.URL.RawQuery,
-			"target_port_header": r.Header.Get("X-Conduit-Target-Port"),
-			"target_name_header": r.Header.Get("X-Conduit-Target-Name"),
-		})
-	}))
-	defer upstream.Close()
-
-	u, err := url.Parse(upstream.URL)
-	if err != nil {
-		t.Fatalf("parse upstream URL: %v", err)
-	}
-	host, portText, err := net.SplitHostPort(u.Host)
-	if err != nil {
-		t.Fatalf("SplitHostPort: %v", err)
-	}
-	port, err := net.LookupPort("tcp", portText)
-	if err != nil {
-		t.Fatalf("LookupPort: %v", err)
-	}
-
-	settings := newTestSettingsStore(t)
-	if _, err := settings.Set("myapp", port); err != nil {
-		t.Fatalf("settings set: %v", err)
-	}
-
-	portTable := NewPortTable()
-	portTable.mu.Lock()
-	portTable.ports[port] = struct{}{}
-	portTable.lastUpdated = time.Now()
-	portTable.mu.Unlock()
-
-	conduit := NewServer(host, portTable, settings, "conduit.local")
-	public := httptest.NewServer(conduit.routes())
-	defer public.Close()
-
-	req, err := http.NewRequest(http.MethodGet, public.URL+"/hello/world?x=1", nil)
-	if err != nil {
-		t.Fatalf("new request: %v", err)
-	}
-	req.Host = "myapp.conduit.local"
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("GET via host route: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -298,7 +223,7 @@ func TestAppsAPIPostAndGet(t *testing.T) {
 	portTable.mu.Unlock()
 
 	settings := newTestSettingsStore(t)
-	conduit := NewServer("127.0.0.1", portTable, settings, "conduit.local")
+	conduit := NewServer("127.0.0.1", portTable, settings)
 	public := httptest.NewServer(conduit.routes())
 	defer public.Close()
 
@@ -343,7 +268,7 @@ func TestProxyRejectsInactivePort(t *testing.T) {
 	portTable.lastUpdated = time.Now()
 	portTable.mu.Unlock()
 
-	conduit := NewServer("127.0.0.1", portTable, newTestSettingsStore(t), "conduit.local")
+	conduit := NewServer("127.0.0.1", portTable, newTestSettingsStore(t))
 	public := httptest.NewServer(conduit.routes())
 	defer public.Close()
 
@@ -519,7 +444,7 @@ func TestRunCommandAppsListParityWithHTTP(t *testing.T) {
 	if err := portTable.Refresh(); err != nil {
 		t.Fatalf("port refresh: %v", err)
 	}
-	server := NewServer("127.0.0.1", portTable, settings, "conduit.local")
+	server := NewServer("127.0.0.1", portTable, settings)
 	httpServer := httptest.NewServer(server.routes())
 	defer httpServer.Close()
 
