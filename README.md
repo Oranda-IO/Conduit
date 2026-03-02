@@ -13,7 +13,8 @@
 <p align="center">
   <strong>Automatic Port Forwarding for Docker Containers</strong>
   <br/>
-  Use a single exposed port to quickly access services running on your container.  Automatic port detection, port forwarding, and app aliasing.  Both CLI and browser UI.
+  Use a single exposed port to quickly access services running on your container.  
+  Automatic port detection, port forwarding, and app aliasing.  CLI, Browser UI, and HTTP API.
 </p>
 
 ---
@@ -29,7 +30,7 @@ Example:
 
 ## Why Conduit
 
--  Auto Discovery:  Pools for local listening ports to find running services.
+-  Auto Discovery:  Polls for local listening ports to find running services.
 -  Single-Port:  Expose one port (e.g. `9000`) and reach all your apps through it.
 
 -  Consistent:  Deployment platforms vary in their port forwarding strategy.  Conduit keeps it consistent.
